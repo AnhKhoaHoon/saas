@@ -13,6 +13,10 @@ return Application::configure(basePath: dirname(__DIR__))
     )
     ->withMiddleware(function (Middleware $middleware) {
         $middleware->statefulApi();
+        $middleware->alias([
+            'rate_limit.api_key' => \App\Http\Middleware\RateLimitApiKey::class,
+            'validate.api_key' => \App\Http\Middleware\ValidateApiKey::class,
+        ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {
         //

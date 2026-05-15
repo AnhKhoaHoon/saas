@@ -133,7 +133,7 @@
 
         /* Container & Cards */
         .container {
-            width: min(500px, calc(100% - 32px));
+            width: min(1100px, calc(100% - 32px));
             margin: 40px auto;
             perspective: 1500px; /* 3D context */
         }
@@ -157,6 +157,8 @@
         }
 
         .stack { display: grid; gap: 24px; }
+        .grid { display: grid; gap: 24px; }
+        .cols-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
         
         /* Typography */
         h1, h2, h3, p { margin: 0; }
@@ -187,7 +189,8 @@
         
         .field input[type="email"],
         .field input[type="password"],
-        .field input[type="text"] {
+        .field input[type="text"],
+        .field select {
             width: 100%;
             background: rgba(0, 0, 0, 0.2);
             border: 1px solid var(--glass-border);
@@ -275,6 +278,8 @@
 
         .errors ul { margin: 0; padding-left: 18px; }
         .muted { color: var(--text-muted); }
+        .mono { font-family: "Consolas", "Courier New", monospace; }
+        .code-list { margin: 0; padding-left: 18px; }
 
         /* Custom Checkbox */
         input[type="checkbox"] {
@@ -291,6 +296,7 @@
             .card { padding: 25px; }
             .actions { flex-direction: column; align-items: stretch; }
             .btn { width: 100%; }
+            .cols-2 { grid-template-columns: 1fr; }
         }
     </style>
 </head>

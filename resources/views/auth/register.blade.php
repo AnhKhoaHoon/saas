@@ -4,7 +4,7 @@
     <section class="card stack">
         <div>
             <h1>Create account</h1>
-            <p class="lead">Form này gọi trực tiếp vào Fortify registration flow đang bật trong project.</p>
+            <p class="lead">Form này gọi trực tiếp vào luồng đăng ký của Fortify đang bật trong project.</p>
         </div>
 
         <form class="stack" method="POST" action="{{ route('register.store') }}">

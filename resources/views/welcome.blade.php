@@ -30,9 +30,10 @@
             background-color: var(--bg-color);
             color: var(--text-main);
             width: 100%;
-            height: 100%;
-            overflow: hidden; /* No scroll, pure app-like feel */
+            min-height: 100%;
+            overflow-x: hidden;
             perspective: 1000px;
+            scroll-behavior: smooth;
         }
 
         /* 1. Animated Mesh Gradient (No Images) */
@@ -107,7 +108,7 @@
         /* Layout */
         .container {
             width: 100%;
-            height: 100%;
+            min-height: 100vh;
             display: flex;
             flex-direction: column;
             position: relative;
@@ -120,6 +121,11 @@
             justify-content: space-between;
             align-items: center;
             padding: 2rem 4rem;
+            position: sticky;
+            top: 0;
+            z-index: 20;
+            backdrop-filter: blur(10px);
+            background: rgba(3, 3, 5, 0.45);
         }
 
         .logo {
@@ -170,11 +176,12 @@
 
         /* 4. 3D Hero Section */
         .hero {
-            flex: 1;
+            min-height: calc(100vh - 96px);
             display: flex;
             justify-content: center;
             align-items: center;
             perspective: 1500px; /* 3D depth for the hero */
+            padding: 2rem 1.5rem 5rem;
         }
 
         .scene {
@@ -312,6 +319,155 @@
             100% { transform: translateY(-50px) rotateX(60deg) rotateY(90deg); }
         }
 
+        .content-stack {
+            width: min(1180px, calc(100% - 3rem));
+            margin: 0 auto 5rem;
+            display: grid;
+            gap: 2rem;
+        }
+
+        .info-section {
+            background: rgba(10, 10, 15, 0.45);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 28px;
+            padding: 2.5rem;
+            backdrop-filter: blur(18px);
+            box-shadow: 0 20px 50px rgba(0,0,0,0.35);
+        }
+
+        .section-header {
+            display: grid;
+            gap: 0.8rem;
+            margin-bottom: 1.75rem;
+        }
+
+        .section-header h2 {
+            font-size: 2.1rem;
+            font-weight: 800;
+        }
+
+        .section-header p {
+            color: var(--text-muted);
+            line-height: 1.7;
+            max-width: 720px;
+        }
+
+        .feature-grid,
+        .doc-grid,
+        .pricing-grid {
+            display: grid;
+            gap: 1.25rem;
+        }
+
+        .feature-grid {
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+        }
+
+        .doc-grid {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+
+        .pricing-grid {
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+        }
+
+        .panel {
+            background: rgba(255,255,255,0.04);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 22px;
+            padding: 1.5rem;
+            display: grid;
+            gap: 0.85rem;
+        }
+
+        .panel h3 {
+            font-size: 1.15rem;
+            font-weight: 700;
+        }
+
+        .panel p,
+        .panel li {
+            color: var(--text-muted);
+            line-height: 1.6;
+        }
+
+        .panel ul {
+            list-style: none;
+            display: grid;
+            gap: 0.65rem;
+        }
+
+        .price {
+            font-size: 2.3rem;
+            font-weight: 900;
+            color: white;
+        }
+
+        .eyebrow {
+            color: var(--accent);
+            text-transform: uppercase;
+            letter-spacing: 0.16em;
+            font-size: 0.8rem;
+            font-weight: 700;
+        }
+
+        .panel .btn-secondary-3d,
+        .panel .btn-primary-3d {
+            justify-self: start;
+            padding: 0.9rem 1.4rem;
+            font-size: 0.95rem;
+        }
+
+        @media (max-width: 980px) {
+            nav {
+                padding: 1.25rem 1.5rem;
+                gap: 1rem;
+                flex-wrap: wrap;
+            }
+
+            .nav-links {
+                gap: 1rem;
+                flex-wrap: wrap;
+            }
+
+            .title {
+                font-size: 3.6rem;
+            }
+
+            .hero-card {
+                padding: 3rem 2rem;
+            }
+
+            .feature-grid,
+            .doc-grid,
+            .pricing-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 640px) {
+            .title {
+                font-size: 2.8rem;
+            }
+
+            .subtitle {
+                font-size: 1.05rem;
+            }
+
+            .action-btns {
+                flex-direction: column;
+            }
+
+            .action-btns a {
+                width: 100%;
+                text-align: center;
+            }
+
+            .info-section {
+                padding: 1.5rem;
+            }
+        }
+
     </style>
 </head>
 <body>
@@ -331,7 +487,7 @@
 
     <div class="container">
         <nav>
-            <a href="#" class="logo">
+            <a href="{{ url('/') }}" class="logo">
                 <div class="logo-icon">
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                         <path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"/>
@@ -340,14 +496,14 @@
                 KeyForge
             </a>
             <div class="nav-links">
-                <a href="#">Features</a>
-                <a href="#">Documentation</a>
-                <a href="#">Pricing</a>
-                <a href="#" class="btn-login">Sign In</a>
+                <a href="#features">Features</a>
+                <a href="#documentation">Documentation</a>
+                <a href="#pricing">Pricing</a>
+                <a href="{{ route('login') }}" class="btn-login">Sign In</a>
             </div>
         </nav>
 
-        <section class="hero">
+        <section class="hero" id="hero">
             <div class="scene" id="scene">
                 <div class="hero-card">
                     <div class="tagline">Next-Gen API Management</div>
@@ -356,12 +512,108 @@
                         No images. Just pure code, mathematics, and design. Protect, manage, and scale your API keys with a platform built for the future.
                     </div>
                     <div class="action-btns">
-                        <a href="#" class="btn-primary-3d">Start For Free</a>
-                        <a href="#" class="btn-secondary-3d">View Documentation</a>
+                        <a href="{{ route('register') }}" class="btn-primary-3d">Start For Free</a>
+                        <a href="#documentation" class="btn-secondary-3d">View Documentation</a>
                     </div>
                 </div>
             </div>
         </section>
+
+        <div class="content-stack">
+            <section class="info-section" id="features">
+                <div class="section-header">
+                    <div class="eyebrow">Features</div>
+                    <h2>Built for teams that manage keys, clients, and auth risk at scale.</h2>
+                    <p>KeyForge gives you a single surface to control account access, protect sensitive settings, and move fast without turning your internal admin flow into a pile of ad-hoc forms.</p>
+                </div>
+
+                <div class="feature-grid">
+                    <article class="panel">
+                        <h3>Authentication Core</h3>
+                        <p>Registration, login, password reset, email verification, and protected account screens are wired through Laravel Fortify.</p>
+                    </article>
+                    <article class="panel">
+                        <h3>Two-Factor Security</h3>
+                        <p>Users can enable 2FA, confirm it with a TOTP code, regenerate recovery codes, and disable it when needed.</p>
+                    </article>
+                    <article class="panel">
+                        <h3>Profile Management</h3>
+                        <p>Account owners can update their name, email, password, and avatar from a single authenticated workspace.</p>
+                    </article>
+                </div>
+            </section>
+
+            <section class="info-section" id="documentation">
+                <div class="section-header">
+                    <div class="eyebrow">Documentation</div>
+                    <h2>Operational docs for API key lifecycle, usage control, and team access.</h2>
+                    <p>KeyForge v2 is designed as a production-grade SaaS for managing API keys across multiple projects, tracking request usage, and enforcing plan-based limits without burying teams in manual admin work.</p>
+                </div>
+
+                <div class="doc-grid">
+                    <article class="panel">
+                        <h3>Project & Key Management</h3>
+                        <ul>
+                            <li>Create and manage multiple projects under a single account.</li>
+                            <li>Issue, rotate, and revoke API keys per project with clear ownership.</li>
+                            <li>Track quota, rate limits, expiration, and status for every active key.</li>
+                        </ul>
+                    </article>
+                    <article class="panel">
+                        <h3>Usage, Billing & Collaboration</h3>
+                        <ul>
+                            <li>Monitor usage logs, dashboards, and alert thresholds by key and project.</li>
+                            <li>Support Free, Pro, and Enterprise plans with billing-aware quota controls.</li>
+                            <li>Invite team members into projects with role-based access for Owner, Admin, Member, and Viewer.</li>
+                        </ul>
+                    </article>
+                </div>
+            </section>
+
+            <section class="info-section" id="pricing">
+                <div class="section-header">
+                    <div class="eyebrow">Pricing</div>
+                    <h2>Pricing aligned with real API operations, not vanity seat counts.</h2>
+                    <p>Each plan maps to how teams usually adopt API infrastructure: start with a single project, grow into shared environments, then move into governance, billing controls, and advanced collaboration.</p>
+                </div>
+
+                <div class="pricing-grid">
+                    <article class="panel">
+                        <h3>Free</h3>
+                        <div class="price">$0</div>
+                        <p>For solo builders validating an API product before they need billing automation or team workflows.</p>
+                        <ul>
+                            <li>1 project workspace</li>
+                            <li>Basic API key management</li>
+                            <li>Starter usage dashboard</li>
+                        </ul>
+                        <a href="{{ route('register') }}" class="btn-secondary-3d">Create Free Workspace</a>
+                    </article>
+                    <article class="panel">
+                        <h3>Pro</h3>
+                        <div class="price">$29</div>
+                        <p>For growing SaaS teams that need stronger quota control, collaboration, and operational visibility.</p>
+                        <ul>
+                            <li>Multiple projects and keys</li>
+                            <li>Usage alerts and rate-limit controls</li>
+                            <li>Team roles and collaboration</li>
+                        </ul>
+                        <a href="{{ route('register') }}" class="btn-primary-3d">Start Pro</a>
+                    </article>
+                    <article class="panel">
+                        <h3>Enterprise</h3>
+                        <div class="price">Custom</div>
+                        <p>For platforms operating shared environments, strict governance, and billing integrations across larger teams.</p>
+                        <ul>
+                            <li>Custom quota and billing workflows</li>
+                            <li>Advanced audit and compliance controls</li>
+                            <li>Priority onboarding for internal rollout</li>
+                        </ul>
+                        <a href="#documentation" class="btn-secondary-3d">Review Platform Scope</a>
+                    </article>
+                </div>
+            </section>
+        </div>
     </div>
 
     <script>
