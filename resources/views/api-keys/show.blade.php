@@ -73,5 +73,21 @@
                 <span class="muted">{{ $project->owner->email }}</span>
             </div>
         </div>
+        </div>
     </section>
+
+    @if ($apiKey->status === 'active')
+        <section class="card stack" style="border-color: var(--danger); margin-top: 2rem;">
+            <div>
+                <h2 style="color: var(--danger);">Danger Zone</h2>
+                <p class="lead">Thu hồi (Revoke) key này sẽ ngay lập tức chặn mọi request sử dụng nó. Hành động này không thể hoàn tác.</p>
+            </div>
+
+            <form method="POST" action="{{ route('projects.api-keys.destroy', [$project, $apiKey]) }}" onsubmit="return confirm('Bạn có chắc chắn muốn thu hồi API key này?');">
+                @csrf
+                @method('DELETE')
+                <button type="submit" style="background: var(--danger); border-color: var(--danger);">Revoke API Key</button>
+            </form>
+        </section>
+    @endif
 @endsection

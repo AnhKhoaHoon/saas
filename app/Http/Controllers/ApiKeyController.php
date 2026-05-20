@@ -39,12 +39,21 @@ class ApiKeyController extends Controller
         ]);
     }
 
+    public function create(Project $project): View
+    {
+        abort_unless($this->canAccessProject(request()->user()->id, $project), 403);
+
+        return view('api-keys.create', [
+            'project' => $project,
+        ]);
+    }
+
     public function store(CreateApiKeyRequest $request, Project $project, CreateApiKeyAction $action): RedirectResponse
     {
         $result = $action->execute($request->user(), $project, $request->payload());
 
         return redirect()
-            ->route('home')
+            ->route('projects.api-keys.index', $project)
             ->with('status', "API key {$result->apiKey->name} created successfully.")
             // Flash the raw secret once so the dashboard can show it immediately after creation and then forget it.
             ->with('new_api_key', [
@@ -62,7 +71,7 @@ class ApiKeyController extends Controller
         $apiKey = $action->execute(request()->user(), $apiKey);
 
         return redirect()
-            ->route('home')
+            ->route('projects.api-keys.index', $project)
             ->with('status', "API key {$apiKey->name} revoked successfully.");
     }
 

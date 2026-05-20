@@ -299,6 +299,7 @@
             .cols-2 { grid-template-columns: 1fr; }
         }
     </style>
+    @livewireStyles
 </head>
 <body>
     <!-- Ambient Backgrounds -->
@@ -322,7 +323,9 @@
 
             <nav class="nav">
                 @auth
-                    <a class="btn secondary" href="{{ route('home') }}">Dashboard</a>
+                    <a class="btn secondary" href="{{ route('home') }}">Projects</a>
+                    <a class="btn secondary" href="{{ route('billing.dashboard') }}">Billing</a>
+                    <a class="btn secondary" href="{{ route('profile.show') }}">Profile</a>
                     <form class="inline" method="POST" action="{{ route('logout') }}">
                         @csrf
                         <button class="secondary" type="submit">Log out</button>
@@ -455,5 +458,6 @@
         }
         animateStars();
     </script>
+    @livewireScripts
 </body>
 </html>
