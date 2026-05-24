@@ -135,25 +135,60 @@
         .container {
             width: min(1100px, calc(100% - 32px));
             margin: 40px auto;
-            perspective: 1500px; /* 3D context */
         }
 
         .scene {
-            transform-style: preserve-3d;
-            transition: transform 0.1s ease-out;
         }
 
         .card {
+            position: relative;
             background: var(--glass-bg);
             backdrop-filter: blur(20px);
             -webkit-backdrop-filter: blur(20px);
             border: 1px solid var(--glass-border);
-            border-top: 1px solid var(--glass-border-light);
-            border-left: 1px solid var(--glass-border-light);
             border-radius: 24px;
             box-shadow: 0 30px 60px rgba(0,0,0,0.5), inset 0 0 0 1px rgba(255,255,255,0.05);
             padding: 40px;
-            transform-style: preserve-3d; /* Allows children to pop */
+            overflow: hidden;
+        }
+
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            border-radius: 24px;
+            padding: 1.5px; /* Border thickness */
+            background: radial-gradient(
+                350px circle at var(--mouse-x, -999px) var(--mouse-y, -999px),
+                rgba(99, 102, 241, 0.4),
+                rgba(236, 72, 153, 0.3) 30%,
+                transparent 70%
+            );
+            -webkit-mask: 
+                linear-gradient(#fff 0 0) content-box, 
+                linear-gradient(#fff 0 0);
+            -webkit-mask-composite: xor;
+            mask-composite: exclude;
+            pointer-events: none;
+            z-index: 2;
+        }
+
+        .card-glow {
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            border-radius: 24px;
+            background: radial-gradient(
+                500px circle at var(--mouse-x, -999px) var(--mouse-y, -999px),
+                rgba(255, 255, 255, 0.04),
+                transparent 50%
+            );
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .card > *:not(.card-glow) {
+            position: relative;
+            z-index: 1;
         }
 
         .stack { display: grid; gap: 24px; }
@@ -169,17 +204,15 @@
             background: linear-gradient(to right, #ffffff, #a5b4fc);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
-            transform: translateZ(40px); /* 3D Pop */
         }
-        h2 { font-size: 1.35rem; transform: translateZ(30px); }
+        h2 { font-size: 1.35rem; }
         p.lead { 
             color: var(--text-muted); 
             line-height: 1.6; 
-            transform: translateZ(30px); 
         }
 
         /* Forms */
-        form { transform: translateZ(20px); }
+        form { }
         .field { display: grid; gap: 8px; }
         .field label { 
             font-weight: 600; 
@@ -261,7 +294,6 @@
             padding: 16px;
             font-size: 0.95rem;
             backdrop-filter: blur(10px);
-            transform: translateZ(25px);
         }
 
         .notice {
@@ -380,31 +412,28 @@
             cursorGlow.style.background = 'radial-gradient(circle, rgba(255,255,255,0.08) 0%, rgba(255,255,255,0) 70%)';
         });
 
-        // 3D Parallax Tilt for Auth Card
-        const scene = document.getElementById('auth-scene');
-        const container = document.querySelector('.container');
-        let isHovering = false;
+        // 3D Parallax Tilt for Auth Card disabled (rigid design)
+        
+        // Interactive Spotlight effect on cards
+        document.querySelectorAll('.card').forEach(card => {
+            if (!card.querySelector('.card-glow')) {
+                const glow = document.createElement('div');
+                glow.className = 'card-glow';
+                card.appendChild(glow);
+            }
 
-        container.addEventListener('mouseenter', () => isHovering = true);
-        container.addEventListener('mouseleave', () => {
-            isHovering = false;
-            scene.style.transform = `rotateY(0deg) rotateX(0deg)`;
-        });
+            card.addEventListener('mousemove', (e) => {
+                const rect = card.getBoundingClientRect();
+                const x = e.clientX - rect.left;
+                const y = e.clientY - rect.top;
+                card.style.setProperty('--mouse-x', `${x}px`);
+                card.style.setProperty('--mouse-y', `${y}px`);
+            });
 
-        container.addEventListener('mousemove', (e) => {
-            if(!isHovering) return;
-            
-            const rect = container.getBoundingClientRect();
-            // Calculate mouse position relative to the center of the container
-            const centerX = rect.left + rect.width / 2;
-            const centerY = rect.top + rect.height / 2;
-            
-            const maxRotate = 8; // less rotation for forms to keep them usable
-            
-            const rotateX = ((e.clientY - centerY) / (rect.height / 2)) * -maxRotate;
-            const rotateY = ((e.clientX - centerX) / (rect.width / 2)) * maxRotate;
-            
-            scene.style.transform = `rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
+            card.addEventListener('mouseleave', () => {
+                card.style.setProperty('--mouse-x', `-999px`);
+                card.style.setProperty('--mouse-y', `-999px`);
+            });
         });
 
         // Background Stars

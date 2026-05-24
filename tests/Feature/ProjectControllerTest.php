@@ -23,7 +23,11 @@ class ProjectControllerTest extends TestCase
             'timezone' => 'Asia/Saigon',
         ]);
 
-        $response->assertRedirect('/home');
+        $project = Project::where('user_id', $user->id)
+            ->where('slug', 'billing-core')
+            ->firstOrFail();
+
+        $response->assertRedirect(route('projects.show', $project));
         $response->assertSessionHas('status');
 
         $this->assertDatabaseHas('projects', [
@@ -67,9 +71,9 @@ class ProjectControllerTest extends TestCase
         ]);
 
         $this->actingAs($user)
-            ->get('/home')
+            ->get(route('projects.show', $project))
             ->assertOk()
-            ->assertSee('Usage logs')
+            ->assertSee('Recent Usage Logs')
             ->assertSee('/api/ping')
             ->assertSee('Primary Key');
     }
@@ -102,7 +106,11 @@ class ProjectControllerTest extends TestCase
         ]);
 
         $this->actingAs($user)
-            ->get('/home?usage_method=POST&usage_status_code=429')
+            ->get(route('projects.usage-logs.index', [
+                'project' => $project,
+                'method' => 'POST',
+                'status_code' => 429,
+            ]))
             ->assertOk()
             ->assertSee('/api/rejected')
             ->assertDontSee('/api/accepted');

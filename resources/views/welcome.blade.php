@@ -32,7 +32,6 @@
             width: 100%;
             min-height: 100%;
             overflow-x: hidden;
-            perspective: 1000px;
             scroll-behavior: smooth;
         }
 
@@ -180,31 +179,65 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            perspective: 1500px; /* 3D depth for the hero */
             padding: 2rem 1.5rem 5rem;
         }
 
         .scene {
             position: relative;
-            transform-style: preserve-3d;
-            transition: transform 0.1s ease-out;
-            /* Will be manipulated by JS */
         }
 
         /* The Glass Card */
         .hero-card {
+            position: relative;
             background: rgba(10, 10, 15, 0.4);
             backdrop-filter: blur(20px);
             -webkit-backdrop-filter: blur(20px);
             border: 1px solid rgba(255,255,255,0.1);
-            border-top: 1px solid rgba(255,255,255,0.2);
-            border-left: 1px solid rgba(255,255,255,0.2);
             padding: 5rem 4rem;
             border-radius: 32px;
             text-align: center;
             max-width: 900px;
             box-shadow: 0 30px 60px rgba(0,0,0,0.6), inset 0 0 0 1px rgba(255,255,255,0.05);
-            transform-style: preserve-3d; /* Allows children to pop out */
+            overflow: hidden;
+        }
+
+        .hero-card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            border-radius: 32px;
+            padding: 1.5px; /* Border thickness */
+            background: radial-gradient(
+                500px circle at var(--mouse-x, -999px) var(--mouse-y, -999px),
+                rgba(99, 102, 241, 0.5),
+                rgba(236, 72, 153, 0.4) 30%,
+                transparent 70%
+            );
+            -webkit-mask: 
+                linear-gradient(#fff 0 0) content-box, 
+                linear-gradient(#fff 0 0);
+            -webkit-mask-composite: xor;
+            mask-composite: exclude;
+            pointer-events: none;
+            z-index: 2;
+        }
+
+        .hero-card-glow {
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            border-radius: 32px;
+            background: radial-gradient(
+                800px circle at var(--mouse-x, -999px) var(--mouse-y, -999px),
+                rgba(255, 255, 255, 0.05),
+                transparent 50%
+            );
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .hero-card > *:not(.hero-card-glow) {
+            position: relative;
+            z-index: 1;
         }
 
         /* 3D Pop Out Elements */
@@ -219,7 +252,6 @@
             border-radius: 50px;
             background: rgba(6, 182, 212, 0.1);
             border: 1px solid rgba(6, 182, 212, 0.2);
-            transform: translateZ(40px); /* 3D POP */
         }
 
         .title {
@@ -227,7 +259,6 @@
             font-weight: 900;
             line-height: 1.1;
             margin-bottom: 1.5rem;
-            transform: translateZ(80px); /* MAX 3D POP */
             background: linear-gradient(to right, #ffffff, #a5b4fc, #f9a8d4);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
@@ -240,12 +271,10 @@
             margin-bottom: 3rem;
             max-width: 600px;
             margin-left: auto; margin-right: auto;
-            transform: translateZ(50px); /* 3D POP */
             line-height: 1.6;
         }
 
         .action-btns {
-            transform: translateZ(60px); /* 3D POP */
             display: flex;
             gap: 1.5rem;
             justify-content: center;
@@ -294,7 +323,6 @@
             backdrop-filter: blur(10px);
             border: 1px solid rgba(255,255,255,0.2);
             border-radius: 20px;
-            transform-style: preserve-3d;
             animation: float 10s infinite alternate ease-in-out;
             pointer-events: none;
         }
@@ -302,21 +330,19 @@
         .geo-1 {
             width: 150px; height: 150px;
             top: 20%; left: 10%;
-            transform: rotateX(45deg) rotateY(45deg) translateZ(-100px);
         }
 
         .geo-2 {
             width: 100px; height: 100px;
             border-radius: 50%;
             bottom: 20%; right: 15%;
-            transform: translateZ(100px);
             animation-duration: 8s;
             animation-delay: -2s;
         }
 
         @keyframes float {
-            0% { transform: translateY(0px) rotateX(45deg) rotateY(45deg); }
-            100% { transform: translateY(-50px) rotateX(60deg) rotateY(90deg); }
+            0% { transform: translateY(0px); }
+            100% { transform: translateY(-50px); }
         }
 
         .content-stack {
@@ -639,33 +665,30 @@
             cursorGlow.style.background = 'radial-gradient(circle, rgba(255,255,255,0.08) 0%, rgba(255,255,255,0) 70%)';
         });
 
-        // 3D Mouse Parallax Effect on the whole Scene
-        let isHovering = false;
+        // 3D Mouse Parallax Effect disabled (rigid design)
+        
+        // Interactive Spotlight effect on the hero card
+        const heroCard = document.querySelector('.hero-card');
+        if (heroCard) {
+            if (!heroCard.querySelector('.hero-card-glow')) {
+                const glow = document.createElement('div');
+                glow.className = 'hero-card-glow';
+                heroCard.appendChild(glow);
+            }
 
-        heroSection.addEventListener('mouseenter', () => isHovering = true);
-        heroSection.addEventListener('mouseleave', () => {
-            isHovering = false;
-            // Reset to default
-            scene.style.transform = `rotateY(0deg) rotateX(0deg)`;
-        });
+            heroCard.addEventListener('mousemove', (e) => {
+                const rect = heroCard.getBoundingClientRect();
+                const x = e.clientX - rect.left;
+                const y = e.clientY - rect.top;
+                heroCard.style.setProperty('--mouse-x', `${x}px`);
+                heroCard.style.setProperty('--mouse-y', `${y}px`);
+            });
 
-        heroSection.addEventListener('mousemove', (e) => {
-            if(!isHovering) return;
-            
-            // Calculate center of screen
-            const centerX = window.innerWidth / 2;
-            const centerY = window.innerHeight / 2;
-            
-            // Max rotation degree
-            const maxRotate = 15; 
-            
-            // Calculate rotation based on mouse position relative to center
-            const rotateX = ((e.clientY - centerY) / centerY) * -maxRotate;
-            const rotateY = ((e.clientX - centerX) / centerX) * maxRotate;
-            
-            // Apply 3D transform to the scene
-            scene.style.transform = `rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
-        });
+            heroCard.addEventListener('mouseleave', () => {
+                heroCard.style.setProperty('--mouse-x', `-999px`);
+                heroCard.style.setProperty('--mouse-y', `-999px`);
+            });
+        }
         
         // Add dynamic particles/stars in background using Canvas for extra "life"
         const canvas = document.createElement('canvas');

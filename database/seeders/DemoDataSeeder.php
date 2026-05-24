@@ -22,6 +22,7 @@ class DemoDataSeeder extends Seeder
         $owner = User::factory()->create([
             'name' => 'KeyForge Owner',
             'email' => 'owner@keyforge.test',
+            'is_admin' => true,
         ]);
 
         $teamUsers = User::factory(4)->create();
@@ -97,7 +98,8 @@ class DemoDataSeeder extends Seeder
                     'description' => "API key {$apiKey->name} was created for {$project->name}.",
                 ]);
             }
-
+            // owner@keyforge.test
+            // password
             AuditLog::factory()->create([
                 'user_id' => $owner->id,
                 'project_id' => $project->id,

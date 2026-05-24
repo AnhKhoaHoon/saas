@@ -27,7 +27,7 @@ class ApiKeyControllerTest extends TestCase
             'ip_whitelist' => '127.0.0.1,10.0.0.5',
         ]);
 
-        $response->assertRedirect('/home');
+        $response->assertRedirect(route('projects.api-keys.index', $project));
         $response->assertSessionHas('new_api_key');
 
         $this->assertDatabaseHas('api_keys', [
@@ -66,7 +66,7 @@ class ApiKeyControllerTest extends TestCase
 
         $response = $this->actingAs($user)->delete("/projects/{$project->id}/api-keys/{$apiKey->id}");
 
-        $response->assertRedirect('/home');
+        $response->assertRedirect(route('projects.api-keys.index', $project));
         $this->assertDatabaseHas('api_keys', [
             'id' => $apiKey->id,
             'status' => 'revoked',
