@@ -2,9 +2,9 @@
 
 namespace App\Policies;
 
-use Illuminate\Auth\Access\Response;
 use App\Models\Project;
 use App\Models\User;
+use App\Support\ProjectPermission;
 
 class ProjectPolicy
 {
@@ -21,7 +21,8 @@ class ProjectPolicy
      */
     public function view(User $user, Project $project): bool
     {
-        return $user->id === $project->user_id; // Later we can add || $project->teamMembers->contains(...)
+        // Kiểm tra quyền xem project bằng mapping Spatie theo role trong team_members.
+        return app(ProjectPermission::class)->userCan($user, $project, 'projects.view');
     }
 
     /**
@@ -37,7 +38,8 @@ class ProjectPolicy
      */
     public function update(User $user, Project $project): bool
     {
-        return $user->id === $project->user_id;
+        // Kiểm tra quyền cập nhật project bằng permission projects.update.
+        return app(ProjectPermission::class)->userCan($user, $project, 'projects.update');
     }
 
     /**
@@ -45,7 +47,8 @@ class ProjectPolicy
      */
     public function delete(User $user, Project $project): bool
     {
-        return $user->id === $project->user_id;
+        // Kiểm tra quyền xóa project bằng permission projects.delete.
+        return app(ProjectPermission::class)->userCan($user, $project, 'projects.delete');
     }
 
     /**

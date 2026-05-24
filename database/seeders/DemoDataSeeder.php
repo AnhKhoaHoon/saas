@@ -25,6 +25,9 @@ class DemoDataSeeder extends Seeder
             'is_admin' => true,
         ]);
 
+        // Gán role Spatie global để demo admin có permission admin.access.
+        $owner->assignRole('platform_admin');
+
         $teamUsers = User::factory(4)->create();
 
         Subscription::factory()->create([

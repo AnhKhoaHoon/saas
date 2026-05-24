@@ -4,6 +4,7 @@ namespace App\Http\Middleware;
 
 use App\Models\ApiKey;
 use App\Models\UsageLog;
+use App\Support\PlanCatalog;
 use Closure;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -47,6 +48,10 @@ class ValidateApiKey
 
         if ($this->ipIsNotAllowed($request, $apiKey)) {
             return $this->error('IP address is not allowed for this API key.', 403);
+        }
+
+        if ($this->monthlyQuotaIsExhausted($apiKey)) {
+            return $this->error('Monthly request quota has been exhausted for this plan.', 429);
         }
 
         // Expose the resolved API key and project so downstream controllers do not need to re-query them.
@@ -107,6 +112,33 @@ class ValidateApiKey
             ],
             'occurred_at' => now(),
         ]);
+    }
+
+    protected function monthlyQuotaIsExhausted(ApiKey $apiKey): bool
+    {
+        // Lấy owner của project để đọc subscription plan.
+        $owner = $apiKey->project->owner;
+
+        // Lấy giới hạn plan hiện tại.
+        $limits = PlanCatalog::limitsFor($owner);
+
+        // Null nghĩa là không giới hạn monthly request.
+        if ($limits['monthly_request_limit'] === null) {
+            // Chưa exhausted.
+            return false;
+        }
+
+        // Đếm usage logs của toàn bộ project thuộc owner trong tháng hiện tại.
+        $monthlyRequests = UsageLog::query()
+            // Chỉ tính project thuộc owner hiện tại.
+            ->whereIn('project_id', $owner->projects()->select('id'))
+            // Chỉ tính request từ đầu tháng.
+            ->where('occurred_at', '>=', now()->startOfMonth())
+            // Đếm số log.
+            ->count();
+
+        // Exhausted khi số request đã đạt giới hạn.
+        return $monthlyRequests >= $limits['monthly_request_limit'];
     }
 
     protected function error(string $message, int $status): JsonResponse

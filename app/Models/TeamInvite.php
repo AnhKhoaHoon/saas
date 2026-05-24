@@ -23,6 +23,7 @@ class TeamInvite extends Model
         'token',
         'expires_at',
         'accepted_at',
+        'cancelled_at',
     ];
 
     /**
@@ -35,6 +36,7 @@ class TeamInvite extends Model
         return [
             'expires_at' => 'datetime',
             'accepted_at' => 'datetime',
+            'cancelled_at' => 'datetime',
         ];
     }
 

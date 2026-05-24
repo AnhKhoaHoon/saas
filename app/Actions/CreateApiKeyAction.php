@@ -7,6 +7,8 @@ use App\Models\ApiKey;
 use App\Models\AuditLog;
 use App\Models\Project;
 use App\Models\User;
+use App\Support\PlanCatalog;
+use App\Support\ProjectPermission;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
@@ -23,6 +25,7 @@ class CreateApiKeyAction
     public function execute(User $actor, Project $project, array $input): CreateApiKeyResult
     {
         $this->ensureActorCanManageProject($actor, $project);
+        $this->ensureApiKeyLimitAllowsCreation($project);
 
         return DB::transaction(function () use ($actor, $project, $input) {
             // Generate the raw secret in application memory only; the database should never persist this value.
@@ -67,14 +70,45 @@ class CreateApiKeyAction
     /**
      * @throws AuthorizationException
      */
+    private function ensureApiKeyLimitAllowsCreation(Project $project): void
+    {
+        // Lấy giới hạn plan của owner project.
+        $limits = PlanCatalog::limitsFor($project->owner);
+
+        // Null nghĩa là plan không giới hạn API key.
+        if ($limits['api_key_limit'] === null) {
+            // Cho phép tạo API key.
+            return;
+        }
+
+        // Đếm tổng API key trên tất cả project của owner.
+        $currentApiKeys = $project->owner
+            // Lấy các project của owner.
+            ->projects()
+            // Đếm tất cả API key thuộc các project đó.
+            ->withCount('apiKeys')
+            // Lấy danh sách count.
+            ->get()
+            // Cộng tổng api_keys_count.
+            ->sum('api_keys_count');
+
+        // Nếu đã chạm giới hạn thì chặn tạo API key mới.
+        if ($currentApiKeys >= $limits['api_key_limit']) {
+            // Ném AuthorizationException để cả web/API action đều bị chặn rõ ràng.
+            throw new AuthorizationException('Your current plan has reached the API key limit.');
+        }
+    }
+
+    /**
+     * @throws AuthorizationException
+     */
     protected function ensureActorCanManageProject(User $actor, Project $project): void
     {
-        $isProjectMember = $project->teamMembers()
-            ->where('user_id', $actor->id)
-            ->whereIn('role', ['owner', 'admin', 'member'])
-            ->exists();
+        // Kiểm tra quyền tạo API key bằng Spatie permission api_keys.create.
+        $canCreateApiKey = app(ProjectPermission::class)->userCan($actor, $project, 'api_keys.create');
 
-        if (! $isProjectMember) {
+        // Nếu role hiện tại không có quyền tạo key thì ném lỗi authorization.
+        if (! $canCreateApiKey) {
             throw new AuthorizationException('You are not allowed to create API keys for this project.');
         }
     }

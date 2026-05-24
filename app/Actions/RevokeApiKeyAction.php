@@ -5,6 +5,7 @@ namespace App\Actions;
 use App\Models\ApiKey;
 use App\Models\AuditLog;
 use App\Models\User;
+use App\Support\ProjectPermission;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Support\Facades\DB;
 
@@ -51,12 +52,11 @@ class RevokeApiKeyAction
      */
     protected function ensureActorCanManageApiKey(User $actor, ApiKey $apiKey): void
     {
-        $isProjectMember = $apiKey->project->teamMembers()
-            ->where('user_id', $actor->id)
-            ->whereIn('role', ['owner', 'admin', 'member'])
-            ->exists();
+        // Kiểm tra quyền revoke API key bằng Spatie permission api_keys.revoke.
+        $canRevokeApiKey = app(ProjectPermission::class)->userCan($actor, $apiKey->project, 'api_keys.revoke');
 
-        if (! $isProjectMember) {
+        // Nếu role hiện tại không có quyền revoke key thì ném lỗi authorization.
+        if (! $canRevokeApiKey) {
             throw new AuthorizationException('You are not allowed to revoke API keys for this project.');
         }
     }

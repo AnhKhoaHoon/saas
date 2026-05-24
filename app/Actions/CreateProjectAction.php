@@ -6,8 +6,10 @@ use App\Models\AuditLog;
 use App\Models\Project;
 use App\Models\TeamMember;
 use App\Models\User;
+use App\Support\PlanCatalog;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
+use Illuminate\Validation\ValidationException;
 
 class CreateProjectAction
 {
@@ -18,6 +20,9 @@ class CreateProjectAction
      */
     public function execute(User $owner, array $input): Project
     {
+        // Kiểm tra giới hạn số project theo plan hiện tại trước khi tạo.
+        $this->ensureProjectLimitAllowsCreation($owner);
+
         return DB::transaction(function () use ($owner, $input) {
             // Build a unique slug before insert so owner-scoped project URLs remain predictable.
             $slug = $this->generateUniqueSlug($owner, (string) $input['name']);
@@ -58,6 +63,33 @@ class CreateProjectAction
 
             return $project;
         });
+    }
+
+    /**
+     * @throws ValidationException
+     */
+    private function ensureProjectLimitAllowsCreation(User $owner): void
+    {
+        // Lấy giới hạn plan hiện tại của owner.
+        $limits = PlanCatalog::limitsFor($owner);
+
+        // Null nghĩa là plan không giới hạn số project.
+        if ($limits['project_limit'] === null) {
+            // Cho phép tạo project.
+            return;
+        }
+
+        // Đếm số project hiện tại của owner.
+        $currentProjects = $owner->projects()->count();
+
+        // Nếu đã chạm giới hạn thì chặn tạo project mới.
+        if ($currentProjects >= $limits['project_limit']) {
+            // Ném validation để controller hiển thị lỗi thân thiện.
+            throw ValidationException::withMessages([
+                // Gắn lỗi vào field plan.
+                'plan' => 'Your current plan has reached the project limit.',
+            ]);
+        }
     }
 
     protected function generateUniqueSlug(User $owner, string $name): string

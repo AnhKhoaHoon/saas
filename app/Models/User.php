@@ -11,10 +11,11 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Fortify\TwoFactorAuthenticatable;
 use Laravel\Sanctum\HasApiTokens;
+use Spatie\Permission\Traits\HasRoles;
 
 class User extends Authenticatable implements FilamentUser, MustVerifyEmail
 {
-    use HasApiTokens, HasFactory, Notifiable, TwoFactorAuthenticatable;
+    use HasApiTokens, HasFactory, HasRoles, Notifiable, TwoFactorAuthenticatable;
 
     /**
      * The attributes that are mass assignable.
@@ -58,8 +59,11 @@ class User extends Authenticatable implements FilamentUser, MustVerifyEmail
 
     public function canAccessPanel(Panel $panel): bool
     {
+        // Chỉ áp dụng rule này cho panel admin của Filament.
         return $panel->getId() === 'admin'
-            && $this->is_admin
+            // Cho phép user có is_admin hoặc permission admin.access vào admin panel.
+            && ($this->is_admin || $this->hasPermissionTo('admin.access'))
+            // Bắt buộc email đã verify trước khi vào admin panel.
             && $this->hasVerifiedEmail();
     }
 

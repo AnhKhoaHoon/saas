@@ -3,12 +3,13 @@
 namespace Database\Factories;
 
 use App\Models\Project;
+use App\Models\TeamInvite;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Str;
 
 /**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\TeamInvite>
+ * @extends Factory<TeamInvite>
  */
 class TeamInviteFactory extends Factory
 {
@@ -27,6 +28,7 @@ class TeamInviteFactory extends Factory
             'token' => Str::random(40),
             'expires_at' => fake()->dateTimeBetween('+1 day', '+14 days'),
             'accepted_at' => null,
+            'cancelled_at' => null,
         ];
     }
 
@@ -34,6 +36,13 @@ class TeamInviteFactory extends Factory
     {
         return $this->state(fn () => [
             'accepted_at' => fake()->dateTimeBetween('-7 days', 'now'),
+        ]);
+    }
+
+    public function cancelled(): static
+    {
+        return $this->state(fn () => [
+            'cancelled_at' => fake()->dateTimeBetween('-7 days', 'now'),
         ]);
     }
 }

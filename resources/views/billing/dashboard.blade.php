@@ -16,11 +16,11 @@
                 <div style="display: flex; justify-content: space-between; align-items: center; padding: 1rem; background: rgba(0,0,0,0.2); border-radius: 12px;">
                     <div>
                         <div style="font-size: 2rem; font-weight: 900; color: {{ $subscription && $subscription->plan === 'pro' ? 'var(--primary)' : '#fff' }};">
-                            {{ ucfirst($subscription->plan ?? 'Hobby (Free)') }}
+                            {{ $limits['name'] }}
                         </div>
                         <div class="muted">{{ $subscription && $subscription->status === 'active' ? 'Active Subscription' : 'No active subscription' }}</div>
                     </div>
-                    @if (!$subscription || $subscription->plan === 'hobby')
+                    @if (!$subscription || $subscription->plan === 'free')
                         <a href="{{ route('billing.pricing') }}" class="btn">Upgrade Plan</a>
                     @else
                         <span style="padding: 6px 12px; background: rgba(16, 185, 129, 0.2); color: #10b981; border-radius: 20px; font-size: 0.85em; font-weight: bold;">ACTIVE</span>
@@ -30,11 +30,15 @@
                 <div class="grid cols-2" style="margin-top: 1rem; font-size: 0.9em;">
                     <div class="field">
                         <label>Monthly Requests Limit</label>
-                        <span class="muted">{{ number_format($subscription->monthly_request_limit ?? 10000) }}</span>
+                        <span class="muted">{{ number_format($limits['monthly_request_limit']) }}</span>
                     </div>
                     <div class="field">
                         <label>Projects Limit</label>
-                        <span class="muted">{{ $subscription->project_limit ?? 1 }}</span>
+                        <span class="muted">{{ $limits['project_limit'] ?? 'Unlimited' }}</span>
+                    </div>
+                    <div class="field">
+                        <label>API Keys Limit</label>
+                        <span class="muted">{{ $limits['api_key_limit'] ?? 'Unlimited' }}</span>
                     </div>
                     <div class="field">
                         <label>Next Billing Date</label>
@@ -43,15 +47,16 @@
                 </div>
             </section>
 
-            @if ($subscription && $subscription->plan !== 'hobby')
+            @if ($subscription && $subscription->plan !== 'free')
                 <section class="card stack" style="border-color: var(--danger);">
                     <div>
-                        <h3 style="color: var(--danger);">Cancel Subscription</h3>
-                        <p class="lead" style="font-size: 0.9em;">Hủy gói cước sẽ chuyển tài khoản của bạn về gói Hobby vào cuối chu kỳ thanh toán hiện tại.</p>
+                        <h3 style="color: var(--danger);">Downgrade to Free</h3>
+                        <p class="lead" style="font-size: 0.9em;">Mock billing sẽ chuyển tài khoản về gói Free ngay lập tức.</p>
                     </div>
-                    <form action="#" method="POST" onsubmit="return confirm('Bạn có chắc chắn muốn hủy gói cước hiện tại không?');">
+                    <form action="{{ route('billing.plan.change') }}" method="POST" onsubmit="return confirm('Bạn có chắc chắn muốn chuyển về gói Free không?');">
                         @csrf
-                        <button type="submit" style="background: transparent; border: 1px solid var(--danger); color: var(--danger);">Cancel Plan</button>
+                        <input type="hidden" name="plan" value="free">
+                        <button type="submit" style="background: transparent; border: 1px solid var(--danger); color: var(--danger);">Downgrade</button>
                     </form>
                 </section>
             @endif

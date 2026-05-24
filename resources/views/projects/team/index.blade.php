@@ -45,9 +45,13 @@
                         <div class="actions" style="padding: 0.5rem 0; border-bottom: 1px solid var(--glass-border-light); justify-content: space-between;">
                             <div>
                                 <div style="font-weight: bold;">{{ $invite->email }}</div>
-                                <div class="muted" style="font-size: 0.85em;">Invited as {{ ucfirst($invite->role) }} • {{ $invite->created_at->diffForHumans() }}</div>
+                                <div class="muted" style="font-size: 0.85em;">Invited as {{ ucfirst($invite->role) }} • expires {{ $invite->expires_at?->diffForHumans() ?? 'never' }}</div>
                             </div>
-                            <button class="secondary" style="padding: 4px 10px; font-size: 0.85em;">Revoke</button>
+                            <form class="inline" method="POST" action="{{ route('projects.team-invites.destroy', [$project, $invite]) }}">
+                                @csrf
+                                @method('DELETE')
+                                <button class="secondary" type="submit" style="padding: 4px 10px; font-size: 0.85em;">Cancel</button>
+                            </form>
                         </div>
                     @empty
                         <p class="muted" style="font-size: 0.9em;">Không có lời mời nào đang chờ.</p>
@@ -63,19 +67,19 @@
                     <p class="lead">Gửi email mời cộng tác viên tham gia vào Project.</p>
                 </div>
 
-                <form class="stack" method="POST" action="#">
+                <form class="stack" method="POST" action="{{ route('projects.team-invites.store', $project) }}">
                     @csrf
                     <div class="field">
                         <label for="email">Email Address</label>
-                        <input id="email" type="email" name="email" placeholder="colleague@company.com" required>
+                        <input id="email" type="email" name="email" value="{{ old('email') }}" placeholder="colleague@company.com" required>
                     </div>
 
                     <div class="field">
                         <label for="role">Role</label>
                         <select id="role" name="role" required>
-                            <option value="admin">Admin (Can manage keys & members)</option>
-                            <option value="member" selected>Member (Can view and manage keys)</option>
-                            <option value="viewer">Viewer (Read-only access)</option>
+                            <option value="admin" @selected(old('role') === 'admin')>Admin (Can manage keys & members)</option>
+                            <option value="member" @selected(old('role', 'member') === 'member')>Member (Can view and manage keys)</option>
+                            <option value="viewer" @selected(old('role') === 'viewer')>Viewer (Read-only access)</option>
                         </select>
                     </div>
 

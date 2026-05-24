@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Actions\ChangeSubscriptionPlanAction;
 use App\Actions\CreateProjectAction;
 use App\Models\Project;
 use App\Models\User;
@@ -51,6 +52,7 @@ class CreateProjectActionTest extends TestCase
     public function test_it_generates_incremented_slug_when_owner_already_has_same_project_name(): void
     {
         $owner = User::factory()->create();
+        app(ChangeSubscriptionPlanAction::class)->execute($owner, 'pro');
 
         Project::factory()->create([
             'user_id' => $owner->id,

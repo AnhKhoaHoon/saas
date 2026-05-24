@@ -157,6 +157,7 @@ class ValidateApiKeyMiddlewareTest extends TestCase
             'key_prefix' => substr($plainTextKey, 0, 12),
             'key_hash' => hash('sha256', $plainTextKey),
             'rate_limit_per_minute' => 2,
+            'ip_whitelist' => null,
         ]);
 
         RateLimiter::clear("api-key-rate:{$apiKey->id}");

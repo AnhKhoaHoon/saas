@@ -182,6 +182,16 @@ Production-grade features:
 - Đã có billing pricing page.
 - Đã có billing dashboard page.
 - Đã có demo subscription data.
+- Đã có mock billing không gọi Stripe và không tốn tiền.
+- Đã có `PlanCatalog` cho Free/Pro/Enterprise.
+- Đã có `ChangeSubscriptionPlanAction`.
+- Đã có route `POST /billing/plan`.
+- User có thể đổi plan mock từ pricing page/dashboard.
+- Đã ghi audit log `subscription.plan_changed`.
+- Đã enforce giới hạn số Project theo plan.
+- Đã enforce giới hạn tổng API Key theo plan.
+- Đã enforce monthly request quota theo subscription.
+- Đã có test `MockBillingTest`.
 
 Lưu ý: phần này hiện mới là placeholder/custom, chưa phải Laravel Cashier + Stripe thật.
 
@@ -197,8 +207,8 @@ Lưu ý: phần này hiện mới là placeholder/custom, chưa phải Laravel C
 - Đã publish Filament assets vào `public/css`, `public/js`, `public/fonts`.
 - Đã thêm migration `is_admin` vào bảng users.
 - `User` đã implement `FilamentUser`.
-- Chỉ user có `is_admin = true` và email verified mới truy cập admin panel được.
-- Đã thêm `Gate::before()` cho admin.
+- Chỉ user có `is_admin = true` hoặc permission `admin.access` và email verified mới truy cập admin panel được.
+- Đã thêm `Gate::before()` cho admin bằng `is_admin` hoặc Spatie permission `admin.access`.
 - Đã có Filament resources:
   - Users.
   - Projects.
@@ -211,6 +221,40 @@ Lưu ý: phần này hiện mới là placeholder/custom, chưa phải Laravel C
 - Đã khóa sửa/xóa Usage Logs và Audit Logs từ admin.
 - Demo user `owner@keyforge.test` đã được seed là admin.
 - Đã có test `AdminPanelAccessTest`.
+
+### RBAC Chuẩn Production
+
+- Đã cài `spatie/laravel-permission` v6.25.
+- Đã publish `config/permission.php`.
+- Đã thêm migration tạo bảng permissions/roles/model_has_permissions/model_has_roles/role_has_permissions.
+- `User` đã dùng trait `HasRoles`.
+- Đã có `PermissionSeeder` tạo permission matrix chuẩn:
+  - `admin.access`
+  - `projects.view/update/delete/manage_team`
+  - `api_keys.view/create/revoke`
+  - `usage_logs.view/export`
+  - `subscriptions.view/manage`
+- Đã có roles:
+  - `platform_admin`
+  - `owner`
+  - `admin`
+  - `member`
+  - `viewer`
+- `platform_admin` có toàn bộ permissions.
+- `owner` có toàn bộ permissions trong project.
+- `admin` được vận hành project nhưng không được xóa project.
+- `member` được xem project, quản lý API keys và xem/export usage logs.
+- `viewer` chỉ được đọc project, API keys, usage logs và subscription.
+- Team role vẫn lưu trong `team_members.role` để hỗ trợ role theo từng project.
+- Mapping role -> permission được đọc từ Spatie roles/permissions trong database.
+- Đã thêm service `App\Support\ProjectPermission` để kiểm tra permission theo project.
+- `ProjectPolicy` đã dùng Spatie permission matrix thay vì check owner đơn giản.
+- `CreateApiKeyAction` đã dùng permission `api_keys.create`.
+- `RevokeApiKeyAction` đã dùng permission `api_keys.revoke`.
+- `ApiKeyController` đã dùng permission `api_keys.view/create`.
+- Demo admin `owner@keyforge.test` được assign role `platform_admin`.
+- Test suite tự seed `PermissionSeeder` khi dùng `RefreshDatabase`.
+- Đã có test `RbacPermissionTest` cover permission matrix chính.
 
 Thông tin login admin demo:
 
@@ -230,34 +274,51 @@ App\Models\User::where('email', 'anhkhoa1292003@gmail.com')->update(['is_admin' 
 
 - `php artisan route:list --path=admin` đã có route admin.
 - `php artisan test --filter=AdminPanelAccessTest` pass.
+- `php artisan test` pass: 74 tests, 217 assertions.
+- `php artisan test tests/Feature/RbacPermissionTest.php` pass.
 - `./vendor/bin/pint --dirty` pass.
-- `composer audit --locked` pass sau khi update `symfony/yaml`.
-
-Lưu ý hiện tại:
-
-- Full `php artisan test` vẫn còn một số test cũ fail do expectation chưa khớp với behavior hiện tại:
-  - Một số test vẫn kỳ vọng redirect về `/home`, trong khi controller hiện redirect về Project/API Key page.
-  - Một số test dashboard usage logs kỳ vọng nội dung cũ.
-  - Một test rate limit có thể fail khi chạy chung suite do state/rate limiter.
+- `composer audit --locked` pass.
 
 ## Còn Thiếu
 
-### RBAC Chuẩn Production
-
-- Chưa cài `spatie/laravel-permission`.
-- Chưa có roles/permissions chuẩn toàn app.
-- Team role hiện đang lưu custom trong `team_members`.
-- ProjectPolicy hiện còn đơn giản, chưa cover đầy đủ Owner/Admin/Member/Viewer.
-- Chưa có permission matrix rõ ràng.
-
 ### Team Invite Flow Hoàn Chỉnh
 
-- Chưa có form/action gửi invite.
-- Chưa gửi email invite.
-- Chưa có accept invite bằng token.
-- Chưa có revoke/cancel invite.
-- Chưa validate invite expired.
-- Chưa convert pending invite thành TeamMember khi accept.
+- Đã có `SendTeamInviteAction`.
+- Action gửi invite đã kiểm tra permission `projects.manage_team`.
+- Action gửi invite đã normalize email lowercase.
+- Action gửi invite đã chặn invite user đã là member của project.
+- Action gửi invite đã validate role chỉ cho phép `admin`, `member`, `viewer`.
+- Action gửi invite đã refresh pending invite thay vì tạo trùng.
+- Action gửi invite đã tạo token mới mỗi lần gửi/resend.
+- Action gửi invite đã ghi audit log `team_invite.sent` nhưng không lưu token vào audit meta.
+- Đã có test `SendTeamInviteActionTest`.
+- Đã có `AcceptTeamInviteAction`.
+- Action accept invite đã tìm invite theo token.
+- Action accept invite đã validate token sai, invite đã accept, invite hết hạn.
+- Action accept invite đã đảm bảo user accept phải có email khớp email được mời.
+- Action accept invite đã convert pending invite thành `TeamMember`.
+- Action accept invite đã đánh dấu `accepted_at`.
+- Action accept invite đã ghi audit log `team_invite.accepted` nhưng không lưu token vào audit meta.
+- Đã có test `AcceptTeamInviteActionTest`.
+- Đã có `TeamInviteController`.
+- Đã có route `POST /projects/{project}/team/invites`.
+- Đã có route `GET /team-invites/{token}/accept`.
+- Trang team đã có form gửi invite thật.
+- Trang team đã hiển thị pending invites theo `accepted_at = null` và chưa hết hạn.
+- Đã có `TeamInviteNotification` gửi email invite bằng Laravel Notification.
+- Controller gửi invite đã dùng on-demand mail notification tới email được mời.
+- Controller accept invite đã redirect user về trang team sau khi accept.
+- Đã có test `TeamInviteControllerTest`.
+- Đã thêm `cancelled_at` vào `team_invites`.
+- Đã có `CancelTeamInviteAction`.
+- Action cancel invite đã kiểm tra permission `projects.manage_team`.
+- Action cancel invite đã chặn invite đã accept hoặc đã cancel.
+- Action cancel invite đã ghi audit log `team_invite.cancelled` nhưng không lưu token vào audit meta.
+- `AcceptTeamInviteAction` đã chặn accept invite đã bị cancel.
+- Pending invite list đã ẩn invite bị cancel.
+- Trang team đã có nút Cancel cho pending invite.
+- Đã có route `DELETE /projects/{project}/team/invites/{teamInvite}`.
+- Đã có test `CancelTeamInviteActionTest`.
 
 ### Billing / Stripe / Cashier
 
@@ -266,15 +327,10 @@ Lưu ý hiện tại:
 - Chưa có Stripe customer portal.
 - Chưa có Stripe webhook.
 - Chưa có invoice/refund thật.
-- Chưa enforce plan Free/Pro/Enterprise.
-- Chưa tự động set quota theo plan.
 - Chưa sync subscription status từ Stripe.
 
 ### Quota Enforcement Theo Plan
 
-- Chưa giới hạn số Project theo plan.
-- Chưa giới hạn số API Key theo plan.
-- Chưa giới hạn monthly request theo subscription.
 - Chưa reset monthly usage.
 - Chưa có monthly usage aggregate table.
 
@@ -336,27 +392,19 @@ Lưu ý hiện tại:
 
 ### Tests Cần Bổ Sung/Sửa
 
-- Cần sửa các test cũ đang lệch expectation redirect/dashboard.
-- Cần thêm tests cho RBAC matrix.
-- Cần thêm tests cho team invite accept flow.
 - Cần thêm tests cho billing/Stripe webhook.
-- Cần thêm tests cho quota enforcement theo plan.
 - Cần thêm tests cho alert jobs.
 - Cần thêm tests cho webhooks.
 - Cần thêm tests cho admin resources/actions quan trọng.
 
 ## Thứ Tự Nên Làm Tiếp
 
-1. Sửa full test suite hiện tại để pass lại.
-2. Làm RBAC chuẩn bằng Spatie Laravel Permission.
-3. Hoàn thiện Team Invite flow.
-4. Tích hợp Laravel Cashier + Stripe.
-5. Enforce quota theo plan.
-6. Chuyển queue/cache/rate limit sang Redis production-ready.
-7. Làm alert notifications.
-8. Làm webhook system.
-9. Nâng cấp audit log đầy đủ.
-10. Nâng cấp admin dashboard widgets và billing/refund actions.
+1. Chuyển queue/cache/rate limit sang Redis production-ready.
+2. Làm alert notifications.
+3. Làm webhook system.
+4. Nâng cấp audit log đầy đủ.
+5. Nâng cấp admin dashboard widgets và billing/refund actions.
+6. Tích hợp Laravel Cashier + Stripe khi cần thu tiền thật.
 
 ## Cách Hướng Dẫn Tiếp Theo
 

@@ -7,6 +7,8 @@ use App\Actions\RevokeApiKeyAction;
 use App\Http\Requests\CreateApiKeyRequest;
 use App\Models\ApiKey;
 use App\Models\Project;
+use App\Models\User;
+use App\Support\ProjectPermission;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
 
@@ -14,7 +16,8 @@ class ApiKeyController extends Controller
 {
     public function index(Project $project): View
     {
-        abort_unless($this->canAccessProject(request()->user()->id, $project), 403);
+        // Chỉ cho user có permission api_keys.view xem danh sách API key.
+        abort_unless($this->canAccessProject(request()->user(), $project, 'api_keys.view'), 403);
 
         $apiKeys = $project->apiKeys()
             ->with(['creator'])
@@ -31,7 +34,8 @@ class ApiKeyController extends Controller
     public function show(Project $project, ApiKey $apiKey): View
     {
         abort_unless($apiKey->project_id === $project->id, 404);
-        abort_unless($this->canAccessProject(request()->user()->id, $project), 403);
+        // Chỉ cho user có permission api_keys.view xem chi tiết API key.
+        abort_unless($this->canAccessProject(request()->user(), $project, 'api_keys.view'), 403);
 
         return view('api-keys.show', [
             'project' => $project->load('owner'),
@@ -41,7 +45,8 @@ class ApiKeyController extends Controller
 
     public function create(Project $project): View
     {
-        abort_unless($this->canAccessProject(request()->user()->id, $project), 403);
+        // Chỉ cho user có permission api_keys.create mở form tạo API key.
+        abort_unless($this->canAccessProject(request()->user(), $project, 'api_keys.create'), 403);
 
         return view('api-keys.create', [
             'project' => $project,
@@ -75,10 +80,9 @@ class ApiKeyController extends Controller
             ->with('status', "API key {$apiKey->name} revoked successfully.");
     }
 
-    protected function canAccessProject(int $userId, Project $project): bool
+    protected function canAccessProject(User $user, Project $project, string $permission): bool
     {
-        return $project->teamMembers()
-            ->where('user_id', $userId)
-            ->exists();
+        // Delegate việc kiểm tra role-permission theo project cho service RBAC.
+        return app(ProjectPermission::class)->userCan($user, $project, $permission);
     }
 }
