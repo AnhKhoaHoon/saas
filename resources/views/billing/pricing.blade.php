@@ -2,8 +2,8 @@
 
 @section('content')
     <div style="text-align: center; margin-bottom: 3rem;">
-        <h1 style="font-size: 3rem; margin-bottom: 1rem;">Simple, transparent pricing</h1>
-        <p class="lead" style="font-size: 1.2rem; max-width: 600px; margin: 0 auto;">Mock billing không gọi Stripe, không thu tiền thật, nhưng vẫn áp dụng quota như SaaS production.</p>
+        <h1 style="font-size: 3rem; margin-bottom: 1rem;">{{ __('ui.billing.pricing_title') }}</h1>
+        <p class="lead" style="font-size: 1.2rem; max-width: 600px; margin: 0 auto;">{{ __('ui.billing.pricing_subtitle') }}</p>
     </div>
 
     <div class="grid" style="grid-template-columns: repeat(3, 1fr); gap: 2rem; align-items: start;">
@@ -24,16 +24,16 @@
                 </div>
 
                 <ul style="list-style: none; padding: 0; margin: 0 0 2rem 0; font-size: 0.95em; line-height: 2;">
-                    <li>Project limit: {{ $plan['project_limit'] ?? 'Unlimited' }}</li>
-                    <li>API key limit: {{ $plan['api_key_limit'] ?? 'Unlimited' }}</li>
-                    <li>Monthly requests: {{ number_format($plan['monthly_request_limit']) }}</li>
-                    <li>Provider: mock billing</li>
+                    <li>{{ __('ui.billing.projects_limit') }}: {{ $plan['project_limit'] ?? __('ui.common.unlimited') }}</li>
+                    <li>{{ __('ui.billing.api_keys_limit') }}: {{ $plan['api_key_limit'] ?? __('ui.common.unlimited') }}</li>
+                    <li>{{ __('ui.billing.monthly_requests_limit') }}: {{ number_format($plan['monthly_request_limit']) }}</li>
+                    <li>{{ __('ui.billing.provider_mock') }}</li>
                 </ul>
 
                 <form method="POST" action="{{ route('billing.plan.change') }}">
                     @csrf
                     <input type="hidden" name="plan" value="{{ $key }}">
-                    <button type="submit" style="width: 100%;">Choose {{ $plan['name'] }}</button>
+                    <button type="submit" style="width: 100%;">{{ __('ui.billing.choose_plan', ['plan' => $plan['name']]) }}</button>
                 </form>
             </div>
         @endforeach

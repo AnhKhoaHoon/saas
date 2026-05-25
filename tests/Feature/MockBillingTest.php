@@ -18,6 +18,23 @@ class MockBillingTest extends TestCase
 {
     use RefreshDatabase;
 
+    public function test_billing_dashboard_defaults_to_free_when_user_has_no_subscription(): void
+    {
+        // Tạo user chưa có subscription record.
+        $user = User::factory()->create();
+
+        // User mở billing dashboard.
+        $this->actingAs($user)
+            // Gọi route dashboard billing.
+            ->get(route('billing.dashboard'))
+            // Trang phải load bình thường.
+            ->assertOk()
+            // Hiển thị fallback plan Free.
+            ->assertSee('Free')
+            // Hiển thị trạng thái chưa có active subscription.
+            ->assertSee('No active subscription');
+    }
+
     public function test_user_can_change_mock_subscription_plan(): void
     {
         // Tạo user cần đổi plan.

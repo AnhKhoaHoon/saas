@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\ApiKeyController;
 use App\Http\Controllers\BillingController;
+use App\Http\Controllers\LocaleController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ProjectController;
 use App\Http\Controllers\TeamInviteController;
@@ -12,6 +13,8 @@ use Illuminate\Support\Facades\Route;
 Route::get('/', function () {
     return view('welcome');
 });
+
+Route::get('/language/{locale}', [LocaleController::class, 'switch'])->name('language.switch');
 
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/home', [ProjectController::class, 'index'])->name('home');

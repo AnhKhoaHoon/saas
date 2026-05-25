@@ -1,30 +1,30 @@
-@extends('layouts.app', ['title' => 'Usage Logs - ' . $project->name])
+@extends('layouts.app', ['title' => __('ui.usage_logs.title') . ' - ' . $project->name])
 
 @section('content')
     <div class="actions" style="margin-bottom: 2rem;">
-        <a href="{{ route('projects.show', $project) }}" class="btn secondary">&larr; Back to Dashboard</a>
+        <a href="{{ route('projects.show', $project) }}" class="btn secondary">&larr; {{ __('ui.common.back_to_dashboard') }}</a>
     </div>
 
     <section class="card stack">
         <div class="actions" style="justify-content: space-between;">
             <div>
-                <h1>Usage Logs</h1>
-                <p class="lead">Tra cứu và phân tích các request đi qua API keys của dự án <strong>{{ $project->name }}</strong>.</p>
+                <h1>{{ __('ui.usage_logs.title') }}</h1>
+                <p class="lead">{{ __('ui.usage_logs.subtitle', ['project' => $project->name]) }}</p>
             </div>
             
             <div class="actions">
                 <a href="{{ route('projects.usage-logs.export', ['project' => $project->id, 'format' => 'csv'] + request()->all()) }}" class="btn secondary">
-                    Export CSV
+                    {{ __('ui.usage_logs.export_csv') }}
                 </a>
                 <a href="{{ route('projects.usage-logs.export', ['project' => $project->id, 'format' => 'pdf'] + request()->all()) }}" class="btn secondary">
-                    Export PDF
+                    {{ __('ui.usage_logs.export_pdf') }}
                 </a>
             </div>
         </div>
 
         <form class="grid cols-2" method="GET" action="{{ route('projects.usage-logs.index', $project) }}" style="background: rgba(0,0,0,0.2); padding: 1.5rem; border-radius: 16px; border: 1px solid var(--glass-border-light);">
             <div class="field">
-                <label for="api_key_id">API Key</label>
+                <label for="api_key_id">{{ __('ui.usage_logs.api_key') }}</label>
                 <select id="api_key_id" name="api_key_id">
                     <option value="">All Keys</option>
                     @foreach ($apiKeys as $key)
@@ -36,7 +36,7 @@
             </div>
 
             <div class="field">
-                <label for="method">HTTP Method</label>
+                <label for="method">{{ __('ui.usage_logs.method') }}</label>
                 <select id="method" name="method">
                     <option value="">All Methods</option>
                     @foreach (['GET', 'POST', 'PUT', 'PATCH', 'DELETE'] as $method)
@@ -46,18 +46,18 @@
             </div>
 
             <div class="field">
-                <label for="status_code">Status Code</label>
+                <label for="status_code">{{ __('ui.usage_logs.status_code') }}</label>
                 <input id="status_code" type="number" name="status_code" value="{{ request('status_code') }}" placeholder="e.g. 200, 404, 500">
             </div>
 
             <div class="field">
-                <label for="search">Global Search</label>
+                <label for="search">{{ __('ui.usage_logs.search') }}</label>
                 <input id="search" type="text" name="search" value="{{ request('search') }}" placeholder="Search by Endpoint, IP, Request ID">
             </div>
 
             <div class="actions" style="grid-column: span 2; margin-top: 10px;">
-                <button type="submit">Filter Logs</button>
-                <a href="{{ route('projects.usage-logs.index', $project) }}" class="btn secondary">Reset</a>
+                <button type="submit">{{ __('ui.usage_logs.filter') }}</button>
+                <a href="{{ route('projects.usage-logs.index', $project) }}" class="btn secondary">{{ __('ui.usage_logs.reset') }}</a>
             </div>
         </form>
 

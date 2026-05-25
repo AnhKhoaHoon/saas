@@ -1,5 +1,8 @@
 <?php
 
+use App\Http\Middleware\RateLimitApiKey;
+use App\Http\Middleware\SetLocale;
+use App\Http\Middleware\ValidateApiKey;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
@@ -13,9 +16,12 @@ return Application::configure(basePath: dirname(__DIR__))
     )
     ->withMiddleware(function (Middleware $middleware) {
         $middleware->statefulApi();
+        $middleware->web(append: [
+            SetLocale::class,
+        ]);
         $middleware->alias([
-            'rate_limit.api_key' => \App\Http\Middleware\RateLimitApiKey::class,
-            'validate.api_key' => \App\Http\Middleware\ValidateApiKey::class,
+            'rate_limit.api_key' => RateLimitApiKey::class,
+            'validate.api_key' => ValidateApiKey::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {

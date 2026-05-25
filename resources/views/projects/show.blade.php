@@ -2,7 +2,7 @@
 
 @section('content')
     <div class="actions" style="margin-bottom: 2rem;">
-        <a href="{{ route('projects.index') }}" class="btn secondary">&larr; Back to list</a>
+        <a href="{{ route('projects.index') }}" class="btn secondary">&larr; {{ __('ui.projects.back_to_list') }}</a>
     </div>
 
     @if (session('status'))
@@ -15,21 +15,21 @@
         <div class="actions" style="justify-content: space-between;">
             <div>
                 <h1>{{ $project->name }} <span class="muted" style="font-size: 0.5em; font-weight: normal;">{{ $project->slug }}</span></h1>
-                <p class="lead">{{ $project->description ?: 'Workspace Dashboard' }}</p>
+                <p class="lead">{{ $project->description ?: __('ui.projects.workspace_dashboard') }}</p>
             </div>
             <div class="actions">
-                <a href="{{ route('projects.team.index', $project) }}" class="btn secondary">Team Members</a>
-                <a href="{{ route('projects.edit', $project) }}" class="btn secondary">Settings</a>
+                <a href="{{ route('projects.team.index', $project) }}" class="btn secondary">{{ __('ui.projects.team_members') }}</a>
+                <a href="{{ route('projects.edit', $project) }}" class="btn secondary">{{ __('ui.common.settings') }}</a>
             </div>
         </div>
 
         <div class="grid cols-2" style="font-size: 0.9em; margin-bottom: 1rem;">
             <div class="field">
-                <label>Status</label>
+                <label>{{ __('ui.common.status') }}</label>
                 <span class="muted">{{ $project->status }}</span>
             </div>
             <div class="field">
-                <label>Timezone</label>
+                <label>{{ __('ui.projects.timezone') }}</label>
                 <span class="muted">{{ $project->settings['timezone'] ?? config('app.timezone') }}</span>
             </div>
         </div>
@@ -38,8 +38,8 @@
     <!-- Biểu đồ thống kê gọi API -->
     <section class="card stack">
         <div>
-            <h2>Usage Statistics (Last 7 days)</h2>
-            <p class="lead">Thống kê lượng request được gọi qua các API Key của project này.</p>
+            <h2>{{ __('ui.projects.usage_stats') }}</h2>
+            <p class="lead">{{ __('ui.projects.usage_stats_help') }}</p>
         </div>
         
         <div style="background: #111; padding: 1rem; border-radius: 8px; border: 1px solid #333;">
@@ -50,8 +50,8 @@
     <div class="grid cols-2">
         <section class="card stack">
             <div class="actions" style="justify-content: space-between;">
-                <h2>Recent API Keys</h2>
-                <a href="{{ route('projects.api-keys.index', $project) }}" class="btn secondary">View All</a>
+                <h2>{{ __('ui.projects.recent_api_keys') }}</h2>
+                <a href="{{ route('projects.api-keys.index', $project) }}" class="btn secondary">{{ __('ui.projects.view_all') }}</a>
             </div>
             
             <div class="stack">
@@ -64,18 +64,18 @@
                         <span class="muted" style="font-size: 0.85em;">{{ $apiKey->status }}</span>
                     </div>
                 @empty
-                    <p class="muted">Chưa có API key nào.</p>
+                    <p class="muted">{{ __('ui.projects.empty_api_keys') }}</p>
                 @endforelse
                 <div style="margin-top: 1rem;">
-                    <a href="{{ route('projects.api-keys.index', $project) }}#create" class="btn">Create New Key</a>
+                    <a href="{{ route('projects.api-keys.index', $project) }}#create" class="btn">{{ __('ui.projects.create_new_key') }}</a>
                 </div>
             </div>
         </section>
 
         <section class="card stack">
             <div class="actions" style="justify-content: space-between;">
-                <h2>Recent Usage Logs</h2>
-                <a href="{{ route('projects.usage-logs.index', $project) }}" class="btn secondary">View All / Export</a>
+                <h2>{{ __('ui.projects.recent_usage_logs') }}</h2>
+                <a href="{{ route('projects.usage-logs.index', $project) }}" class="btn secondary">{{ __('ui.projects.view_all_export') }}</a>
             </div>
             <div class="stack" style="font-size: 0.9em;">
                 @forelse ($usageLogs as $log)
@@ -90,7 +90,7 @@
                         </div>
                     </div>
                 @empty
-                    <p class="muted">Chưa có request nào được ghi nhận.</p>
+                    <p class="muted">{{ __('ui.projects.empty_requests') }}</p>
                 @endforelse
             </div>
         </section>

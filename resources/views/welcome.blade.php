@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -525,20 +525,21 @@
                 <a href="#features">Features</a>
                 <a href="#documentation">Documentation</a>
                 <a href="#pricing">Pricing</a>
-                <a href="{{ route('login') }}" class="btn-login">Sign In</a>
+                <a href="{{ route('language.switch', app()->getLocale() === 'vi' ? 'en' : 'vi') }}">{{ app()->getLocale() === 'vi' ? 'EN' : 'VI' }}</a>
+                <a href="{{ route('login') }}" class="btn-login">{{ __('ui.welcome.sign_in') }}</a>
             </div>
         </nav>
 
         <section class="hero" id="hero">
             <div class="scene" id="scene">
                 <div class="hero-card">
-                    <div class="tagline">Next-Gen API Management</div>
-                    <h1 class="title">Forge Your<br>API Ecosystem</h1>
+                    <div class="tagline">{{ __('ui.welcome.tagline') }}</div>
+                    <h1 class="title">{{ __('ui.welcome.title') }}</h1>
                     <div class="subtitle">
-                        No images. Just pure code, mathematics, and design. Protect, manage, and scale your API keys with a platform built for the future.
+                        {{ __('ui.welcome.subtitle') }}
                     </div>
                     <div class="action-btns">
-                        <a href="{{ route('register') }}" class="btn-primary-3d">Start For Free</a>
+                        <a href="{{ route('register') }}" class="btn-primary-3d">{{ __('ui.welcome.start') }}</a>
                         <a href="#documentation" class="btn-secondary-3d">View Documentation</a>
                     </div>
                 </div>

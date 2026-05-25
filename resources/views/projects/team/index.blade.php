@@ -2,15 +2,15 @@
 
 @section('content')
     <div class="actions" style="margin-bottom: 2rem;">
-        <a href="{{ route('projects.show', $project) }}" class="btn secondary">&larr; Back to Dashboard</a>
+        <a href="{{ route('projects.show', $project) }}" class="btn secondary">&larr; {{ __('ui.common.back_to_dashboard') }}</a>
     </div>
 
     <div class="grid cols-2">
         <div class="stack">
             <section class="card stack">
                 <div>
-                    <h1>Team Members</h1>
-                    <p class="lead">Quản lý những ai có quyền truy cập vào Project này.</p>
+                    <h1>{{ __('ui.team.title') }}</h1>
+                    <p class="lead">{{ __('ui.team.subtitle') }}</p>
                 </div>
 
                 <div class="stack">
@@ -28,33 +28,33 @@
                             <div class="actions">
                                 <span style="padding: 4px 12px; border-radius: 20px; background: rgba(255,255,255,0.1); font-size: 0.85em;">{{ ucfirst($member->role) }}</span>
                                 @if($member->user_id !== auth()->id() && $member->role !== 'owner')
-                                    <button class="secondary" style="padding: 6px 12px; font-size: 0.85em;">Remove</button>
+                                    <button class="secondary" style="padding: 6px 12px; font-size: 0.85em;">{{ __('ui.common.delete') }}</button>
                                 @endif
                             </div>
                         </div>
                     @empty
-                        <p class="muted">Chưa có thành viên nào ngoài bạn.</p>
+                        <p class="muted">{{ __('ui.team.empty_members') }}</p>
                     @endforelse
                 </div>
             </section>
 
             <section class="card stack">
-                <h2>Pending Invites</h2>
+                <h2>{{ __('ui.team.pending_invites') }}</h2>
                 <div class="stack">
                     @forelse ($pendingInvites as $invite)
                         <div class="actions" style="padding: 0.5rem 0; border-bottom: 1px solid var(--glass-border-light); justify-content: space-between;">
                             <div>
                                 <div style="font-weight: bold;">{{ $invite->email }}</div>
-                                <div class="muted" style="font-size: 0.85em;">Invited as {{ ucfirst($invite->role) }} • expires {{ $invite->expires_at?->diffForHumans() ?? 'never' }}</div>
+                                <div class="muted" style="font-size: 0.85em;">{{ __('ui.team.invited_as', ['role' => ucfirst($invite->role), 'expires' => $invite->expires_at?->diffForHumans() ?? __('ui.common.never')]) }}</div>
                             </div>
                             <form class="inline" method="POST" action="{{ route('projects.team-invites.destroy', [$project, $invite]) }}">
                                 @csrf
                                 @method('DELETE')
-                                <button class="secondary" type="submit" style="padding: 4px 10px; font-size: 0.85em;">Cancel</button>
+                                <button class="secondary" type="submit" style="padding: 4px 10px; font-size: 0.85em;">{{ __('ui.common.cancel') }}</button>
                             </form>
                         </div>
                     @empty
-                        <p class="muted" style="font-size: 0.9em;">Không có lời mời nào đang chờ.</p>
+                        <p class="muted" style="font-size: 0.9em;">{{ __('ui.team.empty_invites') }}</p>
                     @endforelse
                 </div>
             </section>
@@ -63,19 +63,19 @@
         <div>
             <section class="card stack" style="position: sticky; top: 20px;">
                 <div>
-                    <h2>Invite New Member</h2>
-                    <p class="lead">Gửi email mời cộng tác viên tham gia vào Project.</p>
+                    <h2>{{ __('ui.team.invite_title') }}</h2>
+                    <p class="lead">{{ __('ui.team.invite_help') }}</p>
                 </div>
 
                 <form class="stack" method="POST" action="{{ route('projects.team-invites.store', $project) }}">
                     @csrf
                     <div class="field">
-                        <label for="email">Email Address</label>
+                        <label for="email">{{ __('ui.team.email') }}</label>
                         <input id="email" type="email" name="email" value="{{ old('email') }}" placeholder="colleague@company.com" required>
                     </div>
 
                     <div class="field">
-                        <label for="role">Role</label>
+                        <label for="role">{{ __('ui.team.role') }}</label>
                         <select id="role" name="role" required>
                             <option value="admin" @selected(old('role') === 'admin')>Admin (Can manage keys & members)</option>
                             <option value="member" @selected(old('role', 'member') === 'member')>Member (Can view and manage keys)</option>
@@ -84,12 +84,12 @@
                     </div>
 
                     <div class="actions" style="margin-top: 1rem;">
-                        <button type="submit" style="width: 100%;">Send Invite</button>
+                        <button type="submit" style="width: 100%;">{{ __('ui.team.send') }}</button>
                     </div>
                 </form>
 
                 <div class="notice" style="margin-top: 1rem; font-size: 0.85em;">
-                    <strong>Lưu ý:</strong> Người được mời cần phải có tài khoản trên hệ thống hoặc sẽ được yêu cầu tạo tài khoản mới khi bấm vào link trong email.
+                    <strong>Note:</strong> {{ __('ui.team.note') }}
                 </div>
             </section>
         </div>

@@ -1,12 +1,12 @@
-@extends('layouts.app', ['title' => 'Projects'])
+@extends('layouts.app', ['title' => __('ui.projects.title')])
 
 @section('content')
     <div class="actions" style="justify-content: space-between; margin-bottom: 2rem;">
         <div>
-            <h1>Projects</h1>
-            <p class="lead">Quản lý các workspace của bạn.</p>
+            <h1>{{ __('ui.projects.title') }}</h1>
+            <p class="lead">{{ __('ui.projects.subtitle') }}</p>
         </div>
-        <a href="{{ route('projects.create') }}" class="btn">Create new project</a>
+        <a href="{{ route('projects.create') }}" class="btn">{{ __('ui.projects.create_new') }}</a>
     </div>
 
     @if (session('status'))
@@ -25,34 +25,34 @@
                     </div>
                 </div>
 
-                <p class="lead" style="min-height: 48px;">{{ $project->description ?: 'No description yet.' }}</p>
+                <p class="lead" style="min-height: 48px;">{{ $project->description ?: __('ui.common.no_description') }}</p>
 
                 <div class="grid cols-2" style="font-size: 0.9em;">
                     <div class="field">
-                        <label>Status</label>
+                        <label>{{ __('ui.common.status') }}</label>
                         <span class="muted">{{ $project->status }}</span>
                     </div>
                     <div class="field">
-                        <label>API keys</label>
+                        <label>{{ __('ui.projects.api_keys') }}</label>
                         <span class="muted">{{ $project->api_keys_count }}</span>
                     </div>
                     <div class="field">
-                        <label>Team members</label>
+                        <label>{{ __('ui.projects.team_members') }}</label>
                         <span class="muted">{{ $project->team_members_count }}</span>
                     </div>
                     <div class="field">
-                        <label>Usage logs</label>
+                        <label>{{ __('ui.projects.usage_logs') }}</label>
                         <span class="muted">{{ $project->usage_logs_count }}</span>
                     </div>
                 </div>
 
                 <div class="actions">
-                    <a class="btn" href="{{ route('projects.show', $project) }}">Dashboard</a>
-                    <a class="btn secondary" href="{{ route('projects.edit', $project) }}">Settings</a>
+                    <a class="btn" href="{{ route('projects.show', $project) }}">{{ __('ui.common.dashboard') }}</a>
+                    <a class="btn secondary" href="{{ route('projects.edit', $project) }}">{{ __('ui.common.settings') }}</a>
                 </div>
             </article>
         @empty
-            <p class="lead" style="grid-column: span 2;">Chưa có project nào. Hãy tạo project đầu tiên để bắt đầu hệ thống.</p>
+            <p class="lead" style="grid-column: span 2;">{{ __('ui.projects.empty') }}</p>
         @endforelse
     </div>
 @endsection

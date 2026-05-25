@@ -195,6 +195,27 @@ Production-grade features:
 
 Lưu ý: phần này hiện mới là placeholder/custom, chưa phải Laravel Cashier + Stripe thật.
 
+### Đa Ngôn Ngữ
+
+- Đã có đổi ngôn ngữ tiếng Việt / tiếng Anh.
+- Đã có route `GET /language/{locale}`.
+- Đã có `LocaleController`.
+- Đã có middleware `SetLocale` để set locale từ session cho mọi web request.
+- Đã thêm nút đổi `VI/EN` trên navbar chính và landing page.
+- Đã có translation files:
+  - `lang/en/ui.php`
+  - `lang/vi/ui.php`
+- Đã chuyển các trang workflow chính sang translation keys:
+  - Layout/navigation.
+  - Landing page hero.
+  - Login/register.
+  - Projects index/create/show.
+  - API keys index/create.
+  - Billing pricing/dashboard.
+  - Team page.
+  - Usage logs page.
+- Đã có test `LocaleSwitchTest`.
+
 ### Admin Panel
 
 - Đã cài `filament/filament`.
@@ -274,7 +295,7 @@ App\Models\User::where('email', 'anhkhoa1292003@gmail.com')->update(['is_admin' 
 
 - `php artisan route:list --path=admin` đã có route admin.
 - `php artisan test --filter=AdminPanelAccessTest` pass.
-- `php artisan test` pass: 74 tests, 217 assertions.
+- `php artisan test` pass: 78 tests, 230 assertions.
 - `php artisan test tests/Feature/RbacPermissionTest.php` pass.
 - `./vendor/bin/pint --dirty` pass.
 - `composer audit --locked` pass.

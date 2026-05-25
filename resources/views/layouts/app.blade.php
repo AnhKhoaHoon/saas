@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -355,16 +355,22 @@
 
             <nav class="nav">
                 @auth
-                    <a class="btn secondary" href="{{ route('home') }}">Projects</a>
-                    <a class="btn secondary" href="{{ route('billing.dashboard') }}">Billing</a>
-                    <a class="btn secondary" href="{{ route('profile.show') }}">Profile</a>
+                    <a class="btn secondary" href="{{ route('home') }}">{{ __('ui.nav.projects') }}</a>
+                    <a class="btn secondary" href="{{ route('billing.dashboard') }}">{{ __('ui.nav.billing') }}</a>
+                    <a class="btn secondary" href="{{ route('profile.show') }}">{{ __('ui.nav.profile') }}</a>
+                    <a class="btn secondary" href="{{ route('language.switch', app()->getLocale() === 'vi' ? 'en' : 'vi') }}">
+                        {{ app()->getLocale() === 'vi' ? 'EN' : 'VI' }}
+                    </a>
                     <form class="inline" method="POST" action="{{ route('logout') }}">
                         @csrf
-                        <button class="secondary" type="submit">Log out</button>
+                        <button class="secondary" type="submit">{{ __('ui.nav.logout') }}</button>
                     </form>
                 @else
-                    <a class="btn secondary" href="{{ route('login') }}">Login</a>
-                    <a class="btn" href="{{ route('register') }}">Register</a>
+                    <a class="btn secondary" href="{{ route('language.switch', app()->getLocale() === 'vi' ? 'en' : 'vi') }}">
+                        {{ app()->getLocale() === 'vi' ? 'EN' : 'VI' }}
+                    </a>
+                    <a class="btn secondary" href="{{ route('login') }}">{{ __('ui.nav.login') }}</a>
+                    <a class="btn" href="{{ route('register') }}">{{ __('ui.nav.register') }}</a>
                 @endauth
             </nav>
         </header>
